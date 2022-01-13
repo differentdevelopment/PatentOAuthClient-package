@@ -8,13 +8,12 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
-use Different\PatentOAuthClient\Models\UserToken;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PatentOAuthClient
 {
     public function redirectToOAuthServer(Request $request)
     {
-        // If the user is already logged in
         if (Auth::user()) {
             return redirect(config('patent-oauth-client.redirect_after_login_uri'));
         }
@@ -67,7 +66,7 @@ class PatentOAuthClient
         if (strlen($state) === 0 || $state !== $request->state) {
             return abort(500, "Request timed out.");
         }
-        
+
         $response = Http::asForm()->post(config('patent-oauth-client.server_uri') . '/oauth/token', [
             'grant_type' => 'authorization_code',
             'client_id' => config('patent-oauth-client.client_id'),
@@ -98,7 +97,11 @@ class PatentOAuthClient
                 return abort(500, "Hiba történt a bejelentkezés közben!");
             }
             
-            $user = User::query()->whereEmail($user_data["email"])->firstOrFail();
+            try {
+                $user = User::query()->where('pas_id', $user_data['id'])->firstOrFail();
+            } catch (ModelNotFoundException $ex) {
+                return abort(500, "Felhasználó nem található!");
+            }
             
             // Csoda porta kód
             if (!$user->isSuperAdmin() && !$user->can('login without account')) {
@@ -115,15 +118,19 @@ class PatentOAuthClient
                 }
             }
 
+            if ($user->email !== $user_data['email']) {
+                $user->email = $user_data['email'];
+            }
+
+            if ($user->name !== $user_data['name']) {
+                $user->name = $user_data['name'];
+            }
+
+            $user->session_id = $request->session_id??null;
+            $user->save();
+
             Auth::login($user);
-
-            /*serToken::query()->create([
-                'user_id' => $user->id,
-                'access_token' => $access_token,
-                'refresh_token' => $refresh_token,
-                'expires_at' => $expires_at,
-            ]);*/
-
+            
             return redirect(config('patent-oauth-client.redirect_after_login_uri'));
         } else {
             return abort(500, "Hiba történt a bejelentkezés közben!");
@@ -132,7 +139,7 @@ class PatentOAuthClient
 
     public function login()
     {
-        return view("patent-oauth-client::login"); 
+        return redirect(route("patent-oauth-client.redirect"));
     }
 
     public function logout(Request $request)
@@ -140,13 +147,78 @@ class PatentOAuthClient
         $user = Auth::user();
 
         if (isset($user) && !empty($user)) {
-            /*$user_token = UserToken::query()->where('user_id', $user->id)->first();
-            if (isset($user_token) && !empty($user_token)) {
-                $user_token->logout();
-            }*/
+            $response = Http::asForm()->post(config('patent-oauth-client.server_uri') . '/oauth/token', [
+                'grant_type' => 'client_credentials',
+                'client_id' => config('patent-oauth-client.client_id'),
+                'client_secret' => config('patent-oauth-client.client_secret'),
+                'scope' => '*',
+            ]);
+
+            if ($response->ok()) {
+                $json = $response->json();
+                if (!empty($json)) {
+                    Http::withHeaders([
+                        'Accept' => 'application/json',
+                        'Authorization' => 'Bearer ' . $json['access_token'],
+                    ])->post(config('patent-oauth-client.server_uri') . '/api/logout', [
+                        'pas_id' => $user->pas_id,
+                        'session_id' => $user->session_id,
+                    ]);
+                }
+            }
+
+            $user->session_id = null;
+            $user->save();
+
             Auth::logout();
         }
 
-        return redirect(config('patent-oauth-client.redirect_after_login_uri')); 
+        return redirect(config('patent-oauth-client.redirect_after_login_uri'))
+            ->withCookie(cookie('pas_logout', config('patent-oauth-client.client_id'))); // TODO: Domain hozzáadása
+    }
+
+    public static function handlePostUser(
+        string|null $email,
+        string|null $name,
+        string|null $password,
+        ?int $user_id = null
+    ) {
+        $user = null;
+        if ($user_id !== null) {
+            $user = User::query()->find($user_id);
+        }
+
+        $response = Http::asForm()->post(config('patent-oauth-client.server_uri') . '/oauth/token', [
+            'grant_type' => 'client_credentials',
+            'client_id' => config('patent-oauth-client.client_id'),
+            'client_secret' => config('patent-oauth-client.client_secret'),
+            'scope' => '*',
+        ]);
+
+        if ($response->ok()) {
+            $json = $response->json();
+
+            if (empty($json)) {
+                return null;
+            }
+
+            $user_response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $json['access_token'],
+            ])->post(config('patent-oauth-client.server_uri') . '/api/user', [
+                'email' => $email,
+                'name' => $name,
+                'password' => $password,
+                'pas_id' => $user?->pas_id??null,
+            ]);
+
+            if ($user_response->ok()) {
+                return $user_response->json();
+            }
+            
+            return null;
+        }
+        
+        return null;
     }
 }
