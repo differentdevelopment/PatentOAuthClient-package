@@ -2,6 +2,7 @@
 
 namespace Different\PatentOAuthClient;
 
+use Different\PatentOAuthClient\app\Console\Commands\PasUserBatchSync;
 use Illuminate\Support\ServiceProvider;
 
 class PatentOAuthClientServiceProvider extends ServiceProvider
@@ -14,6 +15,10 @@ class PatentOAuthClientServiceProvider extends ServiceProvider
         if (empty(config("backpack")) || config("backpack.base.setup_auth_routes") === false) {
             $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
         }
+
+        $this->commands([
+            PasUserBatchSync::class,
+        ]);
 
         /*
          * Optional methods to load your package assets
