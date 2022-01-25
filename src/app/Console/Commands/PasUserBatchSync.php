@@ -70,7 +70,7 @@ class PasUserBatchSync extends Command
              );
 
             if(!$pas_user) {
-                $this->error($user->name_email . ' szinkronizációja nem sikerült.');
+                $this->error($user->name . ' szinkronizációja nem sikerült.');
                 return true;
             }
 
@@ -78,7 +78,7 @@ class PasUserBatchSync extends Command
             $user->pas_id = $pas_user['id'];
             $user->save();
 
-            $this->info($user->name_email . ' szinkronizációja sikerült.');
+            $this->info($user->name . ' szinkronizációja sikerült.');
         });
     }
 }
