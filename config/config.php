@@ -7,4 +7,8 @@ return [
     'client_secret' => env('PATENT_OAUTH_CLIENT_SECRET'),
     'client_redirect_uri' => env('PATENT_OAUTH_REDIRECT_URI'),
     'redirect_after_login_uri' => env('PATENT_OAUTH_REDIRECT_AFTER_LOGIN_URI'),
+
+    // Password Grant Client
+    'pgc_client_id' => env('PATENT_OAUTH_PGC_CLIENT_ID'),
+    'pgc_client_secret' => env('PATENT_OAUTH_PGC_CLIENT_SECRET'),
 ];

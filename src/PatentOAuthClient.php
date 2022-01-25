@@ -234,8 +234,8 @@ class PatentOAuthClient
 
         $response = Http::asForm()->post(config('patent-oauth-client.server_uri') . '/oauth/token', [
             'grant_type' => 'password',
-            'client_id' => config('patent-oauth-client.client_id'),
-            'client_secret' => config('patent-oauth-client.client_secret'),
+            'client_id' => config('patent-oauth-client.pgc_client_id'),
+            'client_secret' => config('patent-oauth-client.pgc_client_secret'),
             'username' => $email,
             'password' => $password,
             'scope' => '*',
