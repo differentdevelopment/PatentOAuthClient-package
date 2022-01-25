@@ -179,7 +179,13 @@ class PatentOAuthClient
         }
 
         return redirect(config('patent-oauth-client.redirect_after_login_uri'))
-            ->withCookie(cookie('pas_logout', config('patent-oauth-client.client_id'))); // TODO: Domain hozzáadása
+            ->withCookie(cookie(
+                'pas_logout', 
+                config('patent-oauth-client.client_id'),
+                10080, // 7 nap
+                null,
+                ".patentapp.eu",
+            ));
     }
 
     public static function handlePostUser(
