@@ -167,8 +167,13 @@ class PatentOAuthClient
                 }
             }
 
-            $user->session_id = null;
-            $user->save();
+            try {
+                $u = User::query()->where('pas_id', $user->id)->firstOrFail();
+                $u->session_id = null;
+                $u->save();
+            } catch (ModelNotFoundException $ex) {
+                
+            }
 
             Auth::logout();
         }
@@ -216,6 +221,75 @@ class PatentOAuthClient
                 return $user_response->json();
             }
             
+            return null;
+        }
+        
+        return null;
+    }
+
+    public static function passwordLogin(string $email, string $password) {
+        if ($email === null || $password === null || $email === "" || $password === "") {
+            return null;
+        }
+
+        $response = Http::asForm()->post(config('patent-oauth-client.server_uri') . '/oauth/token', [
+            'grant_type' => 'password',
+            'client_id' => config('patent-oauth-client.client_id'),
+            'client_secret' => config('patent-oauth-client.client_secret'),
+            'username' => $email,
+            'password' => $password,
+            'scope' => '*',
+        ]);
+
+        if ($response->ok()) {
+            $json = $response->json();
+
+            if (empty($json)) {
+                return null;
+            }
+
+            if ($response->ok()) {
+                $json = $response->json();
+    
+                if (empty($json)) {
+                    return null;
+                }
+    
+                $expires_at = Carbon::now()->addSeconds($json['expires_in']);
+                $access_token = $json['access_token'];
+                $refresh_token = $json['refresh_token'];
+        
+                $response = Http::withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $access_token,
+                ])->get(config('patent-oauth-client.server_uri') . '/api/user');
+        
+                $user_data = $response->json();
+    
+                if (empty($user_data)) {
+                    return null;
+                }
+                
+                try {
+                    $user = User::query()->where('pas_id', $user_data['id'])->firstOrFail();
+                } catch (ModelNotFoundException $ex) {
+                    return null;
+                }
+
+                if ($user->email !== $user_data['email']) {
+                    $user->email = $user_data['email'];
+                }
+    
+                if ($user->name !== $user_data['name']) {
+                    $user->name = $user_data['name'];
+                }
+    
+                $user->session_id = $request->session_id??null;
+                $user->save();
+    
+                return $user;
+            }
+
             return null;
         }
         
