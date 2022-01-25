@@ -59,7 +59,8 @@ class PasUserBatchSync extends Command
         }
 
         $users->each(function (User $user){
-             $password = Str::random(20);
+             //$password = Str::random(20);
+            $password = '12345678';
 
              $pas_user = PatentOAuthClient::handlePostUser(
                  $user->email,
