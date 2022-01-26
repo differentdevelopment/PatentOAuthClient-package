@@ -1,6 +1,6 @@
 <?php
 
-namespace Different\PatentOAuthClient\app\Http\Middleware;
+namespace Different\PatentOAuthClient\app\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Http;
