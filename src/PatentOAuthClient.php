@@ -184,14 +184,7 @@ class PatentOAuthClient
             Auth::logout();
         }
 
-        return redirect(config('patent-oauth-client.redirect_after_login_uri'))
-            ->withCookie(cookie(
-                'pas_logged_in_from',
-                null,
-                0,
-                null,
-                ".patentapp.eu",
-            ));
+        return redirect(config('patent-oauth-client.redirect_after_login_uri'))->withoutCookie('pas_logged_in_from');
     }
 
     public static function handlePostUser(
