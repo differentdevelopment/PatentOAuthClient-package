@@ -134,7 +134,15 @@ class PatentOAuthClient
 
             Auth::login($user);
             
-            return redirect(config('patent-oauth-client.redirect_after_login_uri'));
+            return redirect(config('patent-oauth-client.redirect_after_login_uri'))
+                ->withCookie(cookie(
+                    'pas_logged_in_from', 
+                    config('patent-oauth-client.client_id'),
+                    0,
+                    null,
+                    ".patentapp.eu",
+                ));
+
         } else {
             return abort(500, "Hiba történt a bejelentkezés közben!");
         }
@@ -178,9 +186,9 @@ class PatentOAuthClient
 
         return redirect(config('patent-oauth-client.redirect_after_login_uri'))
             ->withCookie(cookie(
-                'pas_logout', 
-                config('patent-oauth-client.client_id'),
-                10080, // 7 nap
+                'pas_logged_in_from',
+                null,
+                0,
                 null,
                 ".patentapp.eu",
             ));
@@ -288,10 +296,10 @@ class PatentOAuthClient
                     $user->name = $user_data['name'];
                 }
     
-                if ($request->session_id) {
+                /*if ($request->session_id) {
                     session(['pas_session_id' => $request->session_id]);
-                }
-                
+                }*/
+
                 $user->save();
     
                 return $user;
