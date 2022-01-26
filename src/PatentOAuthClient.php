@@ -126,7 +126,10 @@ class PatentOAuthClient
                 $user->name = $user_data['name'];
             }
 
-            $user->session_id = $request->session_id??null;
+            if ($request->session_id) {
+                session(['pas_session_id' => $request->session_id]);
+            }
+
             $user->save();
 
             Auth::login($user);
@@ -157,24 +160,19 @@ class PatentOAuthClient
             if ($response->ok()) {
                 $json = $response->json();
                 if (!empty($json)) {
+                    $session_id = session('pas_session_id');
+
                     Http::withHeaders([
                         'Accept' => 'application/json',
                         'Authorization' => 'Bearer ' . $json['access_token'],
                     ])->post(config('patent-oauth-client.server_uri') . '/api/logout', [
                         'pas_id' => $user->pas_id,
-                        'session_id' => $user->session_id,
+                        'session_id' => $session_id,
                     ]);
                 }
             }
 
-            try {
-                $u = User::query()->where('pas_id', $user->id)->firstOrFail();
-                $u->session_id = null;
-                $u->save();
-            } catch (ModelNotFoundException $ex) {
-                
-            }
-
+            session(['pas_session_id' => null]);
             Auth::logout();
         }
 
@@ -290,7 +288,10 @@ class PatentOAuthClient
                     $user->name = $user_data['name'];
                 }
     
-                $user->session_id = $request->session_id??null;
+                if ($request->session_id) {
+                    session(['pas_session_id' => $request->session_id]);
+                }
+                
                 $user->save();
     
                 return $user;
