@@ -104,17 +104,19 @@ class PatentOAuthClient
             }
             
             // Csoda porta kód
-            if (!$user->isSuperAdmin() && !$user->can('login without account')) {
-                if ($user->cannot('login backend')) {
-                    return abort(500, __('admin::global.cannot_login_to_backend'));
-                }
-
-                if ($user->accounts()->count() == 0 && $user->cannot('change account')) {
-                    return abort(500, __('admin::global.no_account_no_cry'));
-                }
-
-                if (!$user->sites()->count() && $user->cannot('change account')) {
-                    return abort(500, __('admin::global.no_site_no_cry'));
+            if (config('backpack.base.project_name') === 'Patent Porta') {
+                if (!$user->isSuperAdmin() && !$user->can('login without account')) {
+                    if ($user->cannot('login backend')) {
+                        return abort(500, __('admin::global.cannot_login_to_backend'));
+                    }
+    
+                    if ($user->accounts()->count() == 0 && $user->cannot('change account')) {
+                        return abort(500, __('admin::global.no_account_no_cry'));
+                    }
+    
+                    if (!$user->sites()->count() && $user->cannot('change account')) {
+                        return abort(500, __('admin::global.no_site_no_cry'));
+                    }
                 }
             }
 
