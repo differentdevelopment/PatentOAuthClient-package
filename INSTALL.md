@@ -29,4 +29,5 @@ Route::group([
 ],
 ```
 - config/backpack/base.php - `'setup_auth_routes' => false,`
+- config/backpack/base.php - `'guard' => 'web',`
 - `php artisan migrate`
