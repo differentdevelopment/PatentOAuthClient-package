@@ -1,52 +1,24 @@
-# Very short description of the package
+# Új kliens
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/different/patent oauth client.svg?style=flat-square)](https://packagist.org/packages/different/patent oauth client)
-[![Total Downloads](https://img.shields.io/packagist/dt/different/patent oauth client.svg?style=flat-square)](https://packagist.org/packages/different/patent oauth client)
-![GitHub Actions](https://github.com/different/patent oauth client/actions/workflows/main.yml/badge.svg)
+Digital Ocean -> PatentStuff -> patent-auth-server -> Jobb felső sarok `console` gomb -> login.patentapp.eu mappa megnyitása majd:
+> php artisan passport:client
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
+Amikor kérdezi, hogy melyik user-hez kösse a klienst akkor csak Enter-t kell nyomni üresen!
 
-## Installation
-
-You can install the package via composer:
-
-```bash
-composer require different/patent oauth client
+# Projekt beállítások
+env:
+```
+PATENT_OAUTH_PREFIX=""
+PATENT_OAUTH_SERVER_URI="https://login.patentapp.eu"
+PATENT_OAUTH_CLIENT_ID="96a8203a-XXXX-XXXX-XXXX-c397fe0f3aec"
+PATENT_OAUTH_CLIENT_SECRET="XXXXEt5UY2TtlKH5RyuEE53AWjC8sKV2pCsiXXXX"
+PATENT_OAUTH_REDIRECT_URI="http://aisb-laravelbp.localhost/callback"
+PATENT_OAUTH_REDIRECT_AFTER_LOGIN_URI="/admin/dashboard"
+PATENT_OAUTH_PGC_CLIENT_ID=""
+PATENT_OAUTH_PGC_CLIENT_SECRET=""
 ```
 
-## Usage
-
-```php
-// Usage description here
+config/backpack.base.php:
 ```
-
-### Testing
-
-```bash
-composer test
+'setup_auth_routes' => false,
 ```
-
-### Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-### Security
-
-If you discover any security related issues, please email php@different.hu instead of using the issue tracker.
-
-## Credits
-
--   [Different Fejlesztő Kft.](https://github.com/different)
--   [All Contributors](../../contributors)
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-
-## Laravel Package Boilerplate
-
-This package was generated using the [Laravel Package Boilerplate](https://laravelpackageboilerplate.com).
