@@ -193,7 +193,8 @@ class PatentOAuthClient
         string|null $email,
         string|null $name,
         string|null $password,
-        ?int $user_id = null
+        ?int $user_id = null,
+        ?bool $expire_now = false
     ) {
         $user = null;
         if ($user_id !== null) {
@@ -222,6 +223,7 @@ class PatentOAuthClient
                 'name' => $name,
                 'password' => $password,
                 'pas_id' => $user?->pas_id??null,
+                'expire_now' => $expire_now,
             ]);
 
             if ($user_response->ok()) {
