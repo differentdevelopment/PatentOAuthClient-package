@@ -223,7 +223,7 @@ class PatentOAuthClient
                 'name' => $name,
                 'password' => $password,
                 'pas_id' => $user?->pas_id??null,
-                'expire_now' => $expire_now,
+                'expire_now' => $expire_now ? 1 : 0,
             ]);
 
             if ($user_response->ok()) {
